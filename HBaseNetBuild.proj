@@ -1,0 +1,16 @@
+﻿<Project DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="">Debug</Configuration>
+  </PropertyGroup>
+
+	<UsingTask
+    AssemblyFile="$(MSBuildProjectDirectory)\Dependencies\xunit.runner.msbuild.dll"
+    TaskName="Xunit.Runner.MSBuild.xunit"/>
+
+  <Target Name="Build">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\HBaseNet.sln" />
+  </Target>
+  <Target Name="Test" DependsOnTargets="Build">
+    <xunit Assembly="HBaseNet.Tests\bin\$(Configuration)\HBaseNet.Tests.dll" />
+  </Target>
+</Project>
