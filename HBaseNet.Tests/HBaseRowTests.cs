@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using HBaseNet.Protocols;
 using Rhino.Mocks;
@@ -29,60 +27,6 @@ namespace HBaseNet.Tests
             {
                 HBaseRow row = new HBaseRow(rowData);
                 Assert.Contains(columnName, row.Columns.Keys);
-            }
-        }
-
-        [Fact]
-        public void GetRowsRequiresRows()
-        {
-            MockRepository mockRepository = new MockRepository();
-            IHBaseConnection connection = mockRepository.Stub<IHBaseConnection>();
-
-            HBaseDatabase db = new HBaseDatabase(connection);
-            HBaseTable table = new HBaseTable(Encoding.UTF8.GetBytes("stub"), db);
-
-            Assert.Throws<ArgumentNullException>(() => table.GetRows(null));
-            Assert.Throws<ArgumentException>(() => table.GetRows(new List<byte[]>()));
-        }
-
-        [Fact]
-        public void ReturnsRows()
-        {
-            MockRepository mockRepository = new MockRepository();
-            IHBaseConnection connection = mockRepository.Stub<IHBaseConnection>();
-            IList<IHBaseRowData> rowData = new List<IHBaseRowData>()
-                                               {
-                                                   mockRepository.Stub<IHBaseRowData>()
-                                               };
-            byte[] rowName = Encoding.UTF8.GetBytes("r");
-            byte[] columnName = Encoding.UTF8.GetBytes("r");
-            byte[] tableName = Encoding.UTF8.GetBytes("t");
-
-            using (mockRepository.Record())
-            {
-                SetupResult.For(
-                    connection
-                        .GetRows(
-                            new List<byte[]> { rowName },
-                            tableName,
-                            new List<byte[]> { columnName },
-                            123))
-                        .Return(rowData);
-                SetupResult.For(rowData[0].Columns).Return(new Dictionary<byte[], IHBaseCellData>());
-                SetupResult.For(rowData[0].Key).Return(rowName);
-            }
-
-            using (mockRepository.Playback())
-            {
-                HBaseDatabase db = new HBaseDatabase(connection);
-                HBaseTable table = new HBaseTable(tableName, db);
-
-                var rows = table.GetRows(
-                            new List<byte[]> { rowName },
-                            new List<byte[]> { columnName },
-                            123);
-
-                Assert.Contains(rowName, rows.Select(r => r.Key).ToList());
             }
         }
     }

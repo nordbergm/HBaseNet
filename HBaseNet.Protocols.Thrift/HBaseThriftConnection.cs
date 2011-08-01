@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Thrift.HBase;
 using Thrift.Protocol;
 using Thrift.Transport;
@@ -49,6 +48,8 @@ namespace HBaseNet.Protocols.Thrift
             }
         }
 
+        #region Table Operations
+
         public IList<byte[]> GetTables()
         {
             if (!IsOpen)
@@ -59,6 +60,9 @@ namespace HBaseNet.Protocols.Thrift
             return Client.getTableNames();
         }
 
+        #endregion
+
+        #region Row Operations
 
         public IList<IHBaseRowData> GetRows(IList<byte[]> rows, byte[] tableName, IList<byte[]> columns, long? timestamp)
         {
@@ -82,6 +86,51 @@ namespace HBaseNet.Protocols.Thrift
             }
 
             return Client.getRowsWithColumns(tableName, rowsList, columnsList).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+        }
+
+        #endregion
+
+        #region Scanner Operations
+
+        public IList<IHBaseRowData> Scan(byte[] tableName, byte[] startRow, IList<byte[]> columns, long? timestamp = null, int? numRows = null)
+        {
+            List<byte[]> columnsList = columns.ToList();
+
+            if (timestamp.HasValue)
+            {
+                return ExhaustScanner(Client.scannerOpenTs(tableName, startRow, columnsList, timestamp.Value), numRows);
+            }
+
+            return ExhaustScanner(Client.scannerOpen(tableName, startRow, columnsList), numRows);
+        }
+
+        public IList<IHBaseRowData> ScanWithStop(byte[] tableName, byte[] startRow, byte[] stopRow, IList<byte[]> columns, long? timestamp = null, int? numRows = null)
+        {
+            List<byte[]> columnsList = columns.ToList();
+
+            if (timestamp.HasValue)
+            {
+                return ExhaustScanner(Client.scannerOpenWithStopTs(tableName, startRow, stopRow, columnsList, timestamp.Value), numRows);
+            }
+
+            return ExhaustScanner(Client.scannerOpenWithStop(tableName, startRow, stopRow, columnsList), numRows);
+        }
+
+        public IList<IHBaseRowData> ScanWithPrefix(byte[] tableName, byte[] startRowPrefix, IList<byte[]> columns, int? numRows = null)
+        {
+            return ExhaustScanner(Client.scannerOpenWithPrefix(tableName, startRowPrefix, columns.ToList()), numRows);
+        }
+
+        #endregion
+
+        private IList<IHBaseRowData> ExhaustScanner(int id, int? numRows = null)
+        {
+            if (numRows.HasValue)
+            {
+                return Client.scannerGetList(id, numRows.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+            }
+
+            return Client.scannerGet(id).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList(); 
         }
     }
 }

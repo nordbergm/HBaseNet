@@ -52,7 +52,6 @@
     <Compile Include="HBaseRow.cs" />
     <Compile Include="IHBaseConnection.cs" />
     <Compile Include="IHBaseTable.cs" />
-    <Compile Include="IHBaseTableScan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
