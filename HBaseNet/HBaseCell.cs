@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using HBaseNet.Protocols;
 
 namespace HBaseNet
 {
@@ -20,7 +19,7 @@ namespace HBaseNet
 
         #region Implementation of IHBaseCell
 
-        public string Value { get; private set; }
+        public byte[] Value { get; private set; }
         public IList<IHBaseCellVersion> Versions { get; private set; }
 
         #endregion

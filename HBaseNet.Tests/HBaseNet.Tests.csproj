@@ -58,7 +58,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HBaseCellTests.cs" />
     <Compile Include="HBaseDatabaseTests.cs" />
+    <Compile Include="HBaseRowTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

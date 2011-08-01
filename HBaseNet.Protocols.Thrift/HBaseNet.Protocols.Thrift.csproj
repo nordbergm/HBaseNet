@@ -43,6 +43,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HBaseCellData.cs" />
+    <Compile Include="HBaseRowData.cs" />
     <Compile Include="HBaseThriftConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

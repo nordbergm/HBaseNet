@@ -45,9 +45,9 @@
     <Compile Include="HBaseDatabase.cs" />
     <Compile Include="HBaseTable.cs" />
     <Compile Include="IHBaseCell.cs" />
-    <Compile Include="IHBaseCellData.cs" />
+    <Compile Include="Protocols\IHBaseCellData.cs" />
     <Compile Include="IHBaseCellVersion.cs" />
-    <Compile Include="IHBaseRowData.cs" />
+    <Compile Include="Protocols\IHBaseRowData.cs" />
     <Compile Include="HBaseMutation.cs" />
     <Compile Include="HBaseRow.cs" />
     <Compile Include="IHBaseConnection.cs" />

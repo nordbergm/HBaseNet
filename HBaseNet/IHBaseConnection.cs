@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HBaseNet.Protocols;
 
 namespace HBaseNet
 {
@@ -9,6 +10,7 @@ namespace HBaseNet
         bool IsOpen { get; }
         void Close();
 
-        IList<string> GetTables();
+        IList<byte[]> GetTables();
+        IList<IHBaseRowData> GetRows(IList<byte[]> rows, byte[] tableName, IList<byte[]> columns, long? timestamp);
     }
 }

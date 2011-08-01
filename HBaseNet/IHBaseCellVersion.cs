@@ -5,6 +5,6 @@ namespace HBaseNet
     public interface IHBaseCellVersion
     {
         DateTime Timestamp { get; }
-        string Value { get; }
+        byte[] Value { get; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace HBaseNet
+namespace HBaseNet.Protocols
 {
     public interface IHBaseCellData
     {
-        IDictionary<long, string> Values { get; }
+        IDictionary<long, byte[]> Values { get; }
     }
 }

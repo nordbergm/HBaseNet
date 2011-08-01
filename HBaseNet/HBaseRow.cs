@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HBaseNet.Protocols;
 
 namespace HBaseNet
 {
@@ -7,7 +8,7 @@ namespace HBaseNet
         public HBaseRow(IHBaseRowData rowData)
         {
             Key = rowData.Key;
-            Columns = new Dictionary<string, IHBaseCell>(rowData.Columns.Count);
+            Columns = new Dictionary<byte[], IHBaseCell>(rowData.Columns.Count);
 
             foreach (var column in rowData.Columns)
             {
@@ -15,7 +16,7 @@ namespace HBaseNet
             }
         }
 
-        public string Key { get; private set; }
-        public IDictionary<string, IHBaseCell> Columns { get; private set; }
+        public byte[] Key { get; private set; }
+        public IDictionary<byte[], IHBaseCell> Columns { get; private set; }
     }
 }

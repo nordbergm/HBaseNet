@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Rhino.Mocks;
 using Xunit;
 
@@ -84,7 +85,7 @@ namespace HBaseNet.Tests
         {
             MockRepository mockRepository = new MockRepository();
             IHBaseConnection connection = mockRepository.Stub<IHBaseConnection>();
-            IList<string> tableNames = new List<string>() {"table1", "table2"};
+            IList<byte[]> tableNames = new List<byte[]>() { Encoding.UTF8.GetBytes("table1"), Encoding.UTF8.GetBytes("table2") };
 
             using (mockRepository.Record())
             {

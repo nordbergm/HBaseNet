@@ -15,13 +15,11 @@ namespace HBaseNet.Protocols.Thrift
             Transport = new TBufferedTransport(new TSocket(host, port));
             Protocol = new TBinaryProtocol(Transport);
             Client = new Hbase.Client(Protocol);
-            Encoding = Encoding.UTF8;
         }
 
         public Hbase.Client Client { get; private set; }
         public TTransport Transport { get; private set; }
         public TProtocol Protocol { get; private set; }
-        public Encoding Encoding { get; private set; }
 
         public bool IsOpen
         {
@@ -51,14 +49,39 @@ namespace HBaseNet.Protocols.Thrift
             }
         }
 
-        public IList<string> GetTables()
+        public IList<byte[]> GetTables()
         {
             if (!IsOpen)
             {
                 throw new InvalidOperationException("Connection must be open to retrieve tables.");
             }
 
-            return Client.getTableNames().Select(t => Encoding.GetString(t)).ToList();
+            return Client.getTableNames();
+        }
+
+
+        public IList<IHBaseRowData> GetRows(IList<byte[]> rows, byte[] tableName, IList<byte[]> columns, long? timestamp)
+        {
+            List<byte[]> rowsList = rows.ToList();
+
+            if (columns == null || columns.Count == 0)
+            {
+                if (timestamp.HasValue)
+                {
+                    return Client.getRowsTs(tableName, rowsList, timestamp.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+                }
+
+                return Client.getRows(tableName, rowsList).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+            }
+
+            List<byte[]> columnsList = columns.ToList();
+
+            if (timestamp.HasValue)
+            {
+                return Client.getRowsWithColumnsTs(tableName, rowsList, columnsList, timestamp.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+            }
+
+            return Client.getRowsWithColumns(tableName, rowsList, columnsList).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
         }
     }
 }

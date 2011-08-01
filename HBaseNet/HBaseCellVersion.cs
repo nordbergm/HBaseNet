@@ -4,7 +4,7 @@ namespace HBaseNet
 {
     public class HBaseCellVersion : IHBaseCellVersion
     {
-        public HBaseCellVersion(long timestamp, string value)
+        public HBaseCellVersion(long timestamp, byte[] value)
         {
             Timestamp = DateTime.FromBinary(timestamp);
             Value = value;
@@ -13,7 +13,7 @@ namespace HBaseNet
         #region Implementation of IHBaseCellVersion
 
         public DateTime Timestamp { get; private set; }
-        public string Value { get; private set; }
+        public byte[] Value { get; private set; }
 
         #endregion
     }

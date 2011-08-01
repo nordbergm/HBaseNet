@@ -4,7 +4,7 @@ namespace HBaseNet
 {
     public interface IHBaseCell
     {
-        string Value { get; }
+        byte[] Value { get; }
         IList<IHBaseCellVersion> Versions { get; }
     }
 }

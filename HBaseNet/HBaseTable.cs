@@ -1,26 +1,46 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HBaseNet
 {
     public class HBaseTable : IHBaseTable
     {
-        public HBaseTable(string name)
+        public HBaseTable(byte[] name, HBaseDatabase database)
         {
-            if (string.IsNullOrEmpty(name))
+            if (name == null || name.Length == 0)
             {
                 throw new ArgumentNullException("name", "A table must have a name.");
             }
 
             Name = name;
+            Database = database;
         }
+
+        public HBaseDatabase Database { get; private set; }
 
         #region Implementation of IHBaseTable
 
-        public string Name { get; private set; }
+        public byte[] Name { get; private set; }
 
-        public HBaseRow GetRow(string row)
+        public HBaseRow GetRow(byte[] row, IList<byte[]> columns = null, long? timestamp = null)
         {
-            throw new NotImplementedException();
+            return GetRows(new List<byte[]>() {row}, columns, timestamp).FirstOrDefault();
+        }
+
+        public IList<HBaseRow> GetRows(IList<byte[]> rows, IList<byte[]> columns = null, long? timestamp = null)
+        {
+            if (rows == null)
+            {
+                throw new ArgumentNullException("rows");
+            }
+
+            if (rows.Count == 0)
+            {
+                throw new ArgumentException("rows");
+            }
+
+            return Database.Connection.GetRows(rows, this.Name, columns, timestamp).Select(r => new HBaseRow(r)).ToList();
         }
 
         public IHBaseTableScan Scan()
