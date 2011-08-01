@@ -23,9 +23,9 @@ namespace HBaseNet
 
         public IHBaseConnection Connection { get; set; }
 
-        public IList<IHBaseTable> GetTables()
+        public IList<HBaseTable> GetTables()
         {
-            return Connection.GetTables().Select(t => (IHBaseTable)new HBaseTable(t, this)).ToList();
+            return Connection.GetTables().Select(t => new HBaseTable(t, this)).ToList();
         }
 
         public void Close()

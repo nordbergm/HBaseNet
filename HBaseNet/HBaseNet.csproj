@@ -41,21 +41,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HBaseCell.cs" />
-    <Compile Include="HBaseCellVersion.cs" />
+    <Compile Include="HBaseColumn.cs" />
+    <Compile Include="HBaseColumnFamily.cs" />
     <Compile Include="HBaseDatabase.cs" />
+    <Compile Include="HBaseEntityBase.cs" />
     <Compile Include="HBaseTable.cs" />
-    <Compile Include="IHBaseCell.cs" />
     <Compile Include="Protocols\IHBaseCellData.cs" />
-    <Compile Include="IHBaseCellVersion.cs" />
+    <Compile Include="Protocols\IHBaseColumnFamilyData.cs" />
     <Compile Include="Protocols\IHBaseRowData.cs" />
     <Compile Include="HBaseMutation.cs" />
     <Compile Include="HBaseRow.cs" />
     <Compile Include="IHBaseConnection.cs" />
-    <Compile Include="IHBaseTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="HBaseNet.cd" />
+    <Compile Include="Protocols\IHBaseTableData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

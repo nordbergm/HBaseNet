@@ -11,6 +11,32 @@ namespace HBaseNet.Tests
     public class HBaseTableTests
     {
         [Fact]
+        public void LoadsOnLoad()
+        {
+            MockRepository mockRepository = new MockRepository();
+            IHBaseConnection connection = mockRepository.Stub<IHBaseConnection>();
+            IHBaseTableData tableData = mockRepository.Stub<IHBaseTableData>();
+            IHBaseColumnFamilyData cfd = mockRepository.Stub<IHBaseColumnFamilyData>();
+
+            using (mockRepository.Record())
+            {
+                SetupResult.For(cfd.Name).Return(Encoding.UTF8.GetBytes("cf1"));
+                SetupResult.For(tableData.Name).Return(Encoding.UTF8.GetBytes("t"));
+                SetupResult.For(tableData.ColumnFamilies).Return(new Dictionary<byte[], IHBaseColumnFamilyData> { { Encoding.UTF8.GetBytes("cf1"), cfd } });
+                SetupResult.For(connection.GetTables()).Return(new List<IHBaseTableData> { tableData });
+            }
+
+            using (mockRepository.Playback())
+            {
+                HBaseDatabase db = new HBaseDatabase(connection);
+                HBaseTable table = new HBaseTable(Encoding.UTF8.GetBytes("t"), db);
+                table.Load();
+
+                Assert.Equal(1, table.ColumnFamilies.Keys.Count);
+            }
+        }
+
+        [Fact]
         public void GetRowsRequiresRows()
         {
             MockRepository mockRepository = new MockRepository();
@@ -46,7 +72,7 @@ namespace HBaseNet.Tests
                             new List<byte[]> { columnName },
                             123))
                         .Return(rowData);
-                SetupResult.For(rowData[0].Columns).Return(new Dictionary<byte[], IHBaseCellData>());
+                SetupResult.For(rowData[0].Columns).Return(new Dictionary<byte[], IList<IHBaseCellData>>());
                 SetupResult.For(rowData[0].Key).Return(rowName);
             }
 
@@ -61,6 +87,39 @@ namespace HBaseNet.Tests
                             123);
 
                 Assert.Contains(rowName, rows.Select(r => r.Key).ToList());
+            }
+        }
+
+        [Fact]
+        public void ReturnsRow()
+        {
+            MockRepository mockRepository = new MockRepository();
+            IHBaseConnection connection = mockRepository.Stub<IHBaseConnection>();
+            IHBaseRowData rowData = mockRepository.Stub<IHBaseRowData>();
+
+            byte[] rowName = Encoding.UTF8.GetBytes("r");
+            byte[] tableName = Encoding.UTF8.GetBytes("t");
+
+            using (mockRepository.Record())
+            {
+                SetupResult.For(
+                    connection
+                        .GetRow(
+                            tableName,
+                            rowName))
+                        .Return(rowData);
+                SetupResult.For(rowData.Columns).Return(new Dictionary<byte[], IList<IHBaseCellData>>());
+                SetupResult.For(rowData.Key).Return(rowName);
+            }
+
+            using (mockRepository.Playback())
+            {
+                HBaseDatabase db = new HBaseDatabase(connection);
+                HBaseTable table = new HBaseTable(tableName, db);
+
+                var row = table.GetRow(rowName);
+
+                Assert.Equal(rowName, row.Key);
             }
         }
 
@@ -122,8 +181,6 @@ namespace HBaseNet.Tests
             IHBaseRowData rowData2 = mockRepository.Stub<IHBaseRowData>();
             IHBaseRowData rowData3 = mockRepository.Stub<IHBaseRowData>();
 
-            IHBaseCellData cellData = mockRepository.Stub<IHBaseCellData>();
-
             HBaseDatabase db = new HBaseDatabase(connection);
             HBaseTable table = new HBaseTable(Encoding.UTF8.GetBytes("t"), db);
 
@@ -137,15 +194,14 @@ namespace HBaseNet.Tests
 
             using (mockRepository.Record())
             {
-                SetupResult.For(cellData.Values).Return(new Dictionary<long, byte[]>());
                 SetupResult.For(rowData1.Key).Return(startRow1);
-                SetupResult.For(rowData1.Columns).Return(columns.ToDictionary(c => c, c => cellData));
+                SetupResult.For(rowData1.Columns).Return(new Dictionary<byte[], IList<IHBaseCellData>>());
                 
                 SetupResult.For(rowData2.Key).Return(startRow2);
-                SetupResult.For(rowData2.Columns).Return(columns.ToDictionary(c => c, c => cellData));
+                SetupResult.For(rowData2.Columns).Return(new Dictionary<byte[], IList<IHBaseCellData>>());
                 
                 SetupResult.For(rowData3.Key).Return(startRow3);
-                SetupResult.For(rowData3.Columns).Return(columns.ToDictionary(c => c, c => cellData));
+                SetupResult.For(rowData3.Columns).Return(new Dictionary<byte[], IList<IHBaseCellData>>());
                 
                 SetupResult.For(connection.Scan(table.Name, startRow1, columns, timestamp, numRows)).Return(new List<IHBaseRowData> { rowData1 });
                 SetupResult.For(connection.ScanWithStop(table.Name, startRow2, stopRow, columns, timestamp, numRows)).Return(new List<IHBaseRowData> { rowData2 });

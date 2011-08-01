@@ -44,7 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HBaseCellData.cs" />
+    <Compile Include="HBaseColumnFamilyData.cs" />
     <Compile Include="HBaseRowData.cs" />
+    <Compile Include="HBaseTableData.cs" />
     <Compile Include="HBaseThriftConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,11 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HBaseNet.Protocols;
 
 namespace HBaseNet
 {
-    public class HBaseTable : IHBaseTable
+    public class HBaseTable : HBaseEntityBase<IHBaseTableData>
     {
+        public HBaseTable(IHBaseTableData tableData, HBaseDatabase database) : base(tableData)
+        {
+            if (database == null)
+            {
+                throw new ArgumentNullException("database");
+            }
+
+            Database = database;
+        }
+
         public HBaseTable(byte[] name, HBaseDatabase database)
         {
             if (name == null || name.Length == 0)
@@ -13,19 +24,32 @@ namespace HBaseNet
                 throw new ArgumentNullException("name", "A table must have a name.");
             }
 
+            if (database == null)
+            {
+                throw new ArgumentNullException("database");
+            }
+
             Name = name;
             Database = database;
+            ColumnFamilies = new Dictionary<byte[], HBaseColumnFamily>();
         }
 
         public HBaseDatabase Database { get; private set; }
-
-        #region Implementation of IHBaseTable
-
         public byte[] Name { get; private set; }
+        public IDictionary<byte[], HBaseColumnFamily> ColumnFamilies { get; private set; }
 
-        public HBaseRow GetRow(byte[] row, IList<byte[]> columns = null, long? timestamp = null)
+        #region Row Operations
+
+        public HBaseRow GetRow(byte[] row)
         {
-            return GetRows(new List<byte[]> {row}, columns, timestamp).FirstOrDefault();
+            var data = Database.Connection.GetRow(this.Name, row);
+
+            if (data != null)
+            {
+                return new HBaseRow(data, this);
+            }
+
+            return null;
         }
 
         public IList<HBaseRow> GetRows(IList<byte[]> rows, IList<byte[]> columns = null, long? timestamp = null)
@@ -41,11 +65,13 @@ namespace HBaseNet
             }
 
             return Database.Connection.GetRows(rows, this.Name, columns, timestamp)
-                .Select(r => new HBaseRow(r))
+                .Select(r => new HBaseRow(r, this))
                 .ToList();
         }
 
         #endregion
+
+        #region Scan Operations
 
         public IList<HBaseRow> Scan(byte[] startRow, IList<byte[]> columns, long? timestamp = null, int? numRows = null)
         {
@@ -65,7 +91,7 @@ namespace HBaseNet
             }
 
             return Database.Connection.Scan(this.Name, startRow, columns, timestamp, numRows)
-                .Select(r => new HBaseRow(r))
+                .Select(r => new HBaseRow(r, this))
                 .ToList();
         }
 
@@ -92,7 +118,7 @@ namespace HBaseNet
             }
 
             return Database.Connection.ScanWithStop(this.Name, startRow, stopRow, columns, timestamp, numRows)
-                .Select(r => new HBaseRow(r))
+                .Select(r => new HBaseRow(r, this))
                 .ToList();
         }
 
@@ -114,8 +140,25 @@ namespace HBaseNet
             }
 
             return Database.Connection.ScanWithPrefix(this.Name, startRowPrefix, columns, numRows)
-                .Select(r => new HBaseRow(r))
+                .Select(r => new HBaseRow(r, this))
                 .ToList();
         }
+
+        #endregion
+
+        #region Overrides of HBaseEntityBase<IHBaseTableData>
+
+        protected override IHBaseTableData Read()
+        {
+            return Database.Connection.GetTables().SingleOrDefault(t => t.Name.SequenceEqual(Name));
+        }
+
+        protected override void Load(IHBaseTableData data)
+        {
+            Name = data.Name;
+            ColumnFamilies = data.ColumnFamilies.ToDictionary(cf => cf.Key, cf => new HBaseColumnFamily(cf.Key, this));
+        }
+
+        #endregion
     }
 }

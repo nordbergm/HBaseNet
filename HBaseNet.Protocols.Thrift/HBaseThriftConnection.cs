@@ -50,19 +50,36 @@ namespace HBaseNet.Protocols.Thrift
 
         #region Table Operations
 
-        public IList<byte[]> GetTables()
+        public IList<IHBaseTableData> GetTables()
         {
             if (!IsOpen)
             {
                 throw new InvalidOperationException("Connection must be open to retrieve tables.");
             }
 
-            return Client.getTableNames();
+            return Client.getTableNames().Select(t => (IHBaseTableData)new HBaseTableData(t, GetColumnFamilies(t))).ToList();
+        }
+
+        public IDictionary<byte[], IHBaseColumnFamilyData> GetColumnFamilies(byte[] tableName)
+        {
+            return Client.getColumnDescriptors(tableName).ToDictionary(cd => cd.Key, cd => (IHBaseColumnFamilyData)new HBaseColumnFamilyData(cd.Value));
         }
 
         #endregion
 
         #region Row Operations
+
+        public IHBaseRowData GetRow(byte[] tableName, byte[] row)
+        {
+            var result = Client.getRow(tableName, row);
+
+            if (result != null && result.Count > 0)
+            {
+                return new HBaseRowData(result);
+            }
+
+            return null;
+        }
 
         public IList<IHBaseRowData> GetRows(IList<byte[]> rows, byte[] tableName, IList<byte[]> columns, long? timestamp)
         {
@@ -86,6 +103,15 @@ namespace HBaseNet.Protocols.Thrift
             }
 
             return Client.getRowsWithColumns(tableName, rowsList, columnsList).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+        }
+
+        #endregion
+
+        #region Column Operations
+
+        public IList<IHBaseCellData> GetColumn(byte[] tableName, byte[] row, byte[] column)
+        {
+            return Client.get(tableName, row, column).Select(c => (IHBaseCellData)new HBaseCellData(c)).ToList();
         }
 
         #endregion

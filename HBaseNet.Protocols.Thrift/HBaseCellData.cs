@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Thrift.HBase;
+﻿using Thrift.HBase;
 
 namespace HBaseNet.Protocols.Thrift
 {
@@ -7,9 +6,11 @@ namespace HBaseNet.Protocols.Thrift
     {
         public HBaseCellData(TCell cell)
         {
-            Values = new Dictionary<long, byte[]> { { cell.Timestamp, cell.Value } };
+            Timestamp = cell.Timestamp;
+            Value = cell.Value;
         }
 
-        public IDictionary<long, byte[]> Values { get; private set; }
+        public long Timestamp { get; private set; }
+        public byte[] Value { get; private set; }
     }
 }
