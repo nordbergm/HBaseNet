@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{4D2064F9
 		HBaseNetBuild.proj = HBaseNetBuild.proj
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift.Tests", "HBaseNet.Protocols.Thrift.Tests\HBaseNet.Protocols.Thrift.Tests.csproj", "{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift.IntegrationTests", "HBaseNet.Protocols.Thrift.IntegrationTests\HBaseNet.Protocols.Thrift.IntegrationTests.csproj", "{9D8B82A6-D9B6-4F8C-9366-8D250A053429}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +50,14 @@ Global
 		{8E1E2AE4-39D0-486D-9AE1-956B97BB5F73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E1E2AE4-39D0-486D-9AE1-956B97BB5F73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E1E2AE4-39D0-486D-9AE1-956B97BB5F73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D8B82A6-D9B6-4F8C-9366-8D250A053429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D8B82A6-D9B6-4F8C-9366-8D250A053429}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D8B82A6-D9B6-4F8C-9366-8D250A053429}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D8B82A6-D9B6-4F8C-9366-8D250A053429}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,5 +66,7 @@ Global
 		{7F7E4FAD-84D3-4338-8B5F-F5B48936C466} = {8675DA0A-F193-4425-B10A-9A4D58DDE3EC}
 		{CB5B2B54-A2B8-496E-AC3D-177A892861C1} = {8675DA0A-F193-4425-B10A-9A4D58DDE3EC}
 		{25850B64-4B96-4485-8D2D-0D28A5DB87C9} = {6D2281C1-3265-4909-8A8E-C6AD09BE716A}
+		{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD} = {6D2281C1-3265-4909-8A8E-C6AD09BE716A}
+		{9D8B82A6-D9B6-4F8C-9366-8D250A053429} = {6D2281C1-3265-4909-8A8E-C6AD09BE716A}
 	EndGlobalSection
 EndGlobal

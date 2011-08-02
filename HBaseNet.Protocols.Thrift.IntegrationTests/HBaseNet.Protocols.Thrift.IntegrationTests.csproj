@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{89E96660-7B49-4763-94AA-7D2F3C4394FD}</ProjectGuid>
+    <ProjectGuid>{9D8B82A6-D9B6-4F8C-9366-8D250A053429}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HBaseNet</RootNamespace>
-    <AssemblyName>HBaseNet</AssemblyName>
+    <RootNamespace>HBaseNet.Protocols.Thrift.IntegrationTests</RootNamespace>
+    <AssemblyName>HBaseNet.Protocols.Thrift.IntegrationTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Rhino.Mocks">
+      <HintPath>..\Dependencies\Rhino.Mocks.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -38,27 +41,29 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="xunit">
+      <HintPath>..\Dependencies\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.extensions">
+      <HintPath>..\Dependencies\xunit.extensions.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HBaseCell.cs" />
-    <Compile Include="HBaseColumn.cs" />
-    <Compile Include="HBaseColumnFamily.cs" />
-    <Compile Include="HBaseDatabase.cs" />
-    <Compile Include="HBaseEntityBase.cs" />
-    <Compile Include="HBaseException.cs" />
-    <Compile Include="HBaseTable.cs" />
-    <Compile Include="Mutations\UpdateColumnMutation.cs" />
-    <Compile Include="Mutations\DeleteColumnMutation.cs" />
-    <Compile Include="Mutations\HBaseMutationBase.cs" />
-    <Compile Include="Mutations\IHBaseMutation.cs" />
-    <Compile Include="Protocols\IHBaseCellData.cs" />
-    <Compile Include="Protocols\IHBaseColumnFamilyData.cs" />
-    <Compile Include="Protocols\IHBaseRowData.cs" />
-    <Compile Include="Protocols\IHBaseMutation.cs" />
-    <Compile Include="HBaseRow.cs" />
-    <Compile Include="IHBaseConnection.cs" />
+    <Compile Include="HBaseThriftConnectionTests.cs" />
+    <Compile Include="PrioritizedFixtureAttribute.cs" />
+    <Compile Include="PrioritizedFixtureClassCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocols\IHBaseTableData.cs" />
+    <Compile Include="TestPriorityAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HBaseNet.Protocols.Thrift\HBaseNet.Protocols.Thrift.csproj">
+      <Project>{CB5B2B54-A2B8-496E-AC3D-177A892861C1}</Project>
+      <Name>HBaseNet.Protocols.Thrift</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HBaseNet\HBaseNet.csproj">
+      <Project>{89E96660-7B49-4763-94AA-7D2F3C4394FD}</Project>
+      <Name>HBaseNet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

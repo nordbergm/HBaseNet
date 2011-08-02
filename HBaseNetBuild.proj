@@ -12,5 +12,9 @@
   </Target>
   <Target Name="Test" DependsOnTargets="Build">
     <xunit Assembly="HBaseNet.Tests\bin\$(Configuration)\HBaseNet.Tests.dll" />
+    <xunit Assembly="HBaseNet.Protocols.Thrift.Tests\bin\$(Configuration)\HBaseNet.Protocols.Thrift.Tests.dll" />
+  </Target>
+  <Target Name="IntegrationTest" DependsOnTargets="Build">
+    <xunit Assembly="HBaseNet.Protocols.Thrift.IntegrationTests\bin\$(Configuration)\HBaseNet.Protocols.Thrift.IntegrationTests.dll" />
   </Target>
 </Project>

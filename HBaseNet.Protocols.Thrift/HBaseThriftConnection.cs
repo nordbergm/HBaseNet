@@ -57,14 +57,17 @@ namespace HBaseNet.Protocols.Thrift
                 throw new InvalidOperationException("Connection must be open to retrieve tables.");
             }
 
-            return Client.getTableNames()
-                    .Select(t => (IHBaseTableData)new HBaseTableData(t, Client.isTableEnabled(t), GetColumnFamilies(t)))
-                    .ToList();
+            return ExecuteCommand(
+                () => Client.getTableNames()
+                        .Select(t => (IHBaseTableData)new HBaseTableData(t, Client.isTableEnabled(t), GetColumnFamilies(t)))
+                        .ToList());
         }
 
         public IDictionary<byte[], IHBaseColumnFamilyData> GetColumnFamilies(byte[] tableName)
         {
-            return Client.getColumnDescriptors(tableName).ToDictionary(cd => cd.Key, cd => (IHBaseColumnFamilyData)new HBaseColumnFamilyData(cd.Value));
+            return ExecuteCommand(
+                () => Client.getColumnDescriptors(tableName)
+                        .ToDictionary(cd => cd.Key, cd => (IHBaseColumnFamilyData)new HBaseColumnFamilyData(cd.Value)));
         }
 
         #endregion
@@ -73,7 +76,7 @@ namespace HBaseNet.Protocols.Thrift
 
         public IHBaseRowData GetRow(byte[] tableName, byte[] row)
         {
-            var result = Client.getRow(tableName, row);
+            var result = ExecuteCommand(() => Client.getRow(tableName, row));
 
             if (result != null && result.Count > 0)
             {
@@ -83,7 +86,7 @@ namespace HBaseNet.Protocols.Thrift
             return null;
         }
 
-        public IList<IHBaseRowData> GetRows(IList<byte[]> rows, byte[] tableName, IList<byte[]> columns, long? timestamp)
+        public IList<IHBaseRowData> GetRows(IList<byte[]> rows, byte[] tableName, IList<byte[]> columns, long? timestamp = null)
         {
             List<byte[]> rowsList = rows.ToList();
 
@@ -91,20 +94,28 @@ namespace HBaseNet.Protocols.Thrift
             {
                 if (timestamp.HasValue)
                 {
-                    return Client.getRowsTs(tableName, rowsList, timestamp.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+                    return ExecuteCommand(
+                        () => Client.getRowsTs(tableName, rowsList, timestamp.Value)
+                                .Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList());
                 }
 
-                return Client.getRows(tableName, rowsList).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+                return ExecuteCommand(
+                        () => Client.getRows(tableName, rowsList)
+                                .Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList());
             }
 
             List<byte[]> columnsList = columns.ToList();
 
             if (timestamp.HasValue)
             {
-                return Client.getRowsWithColumnsTs(tableName, rowsList, columnsList, timestamp.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+                return ExecuteCommand(
+                        () => Client.getRowsWithColumnsTs(tableName, rowsList, columnsList, timestamp.Value)
+                                .Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList());
             }
 
-            return Client.getRowsWithColumns(tableName, rowsList, columnsList).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+            return ExecuteCommand(
+                    () => Client.getRowsWithColumns(tableName, rowsList, columnsList)
+                            .Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList());
         }
 
         #endregion
@@ -113,7 +124,9 @@ namespace HBaseNet.Protocols.Thrift
 
         public IList<IHBaseCellData> GetColumn(byte[] tableName, byte[] row, byte[] column)
         {
-            return Client.get(tableName, row, column).Select(c => (IHBaseCellData)new HBaseCellData(c)).ToList();
+            return ExecuteCommand(
+                    () => Client.get(tableName, row, column)
+                            .Select(c => (IHBaseCellData)new HBaseCellData(c)).ToList());
         }
 
         #endregion
@@ -126,10 +139,12 @@ namespace HBaseNet.Protocols.Thrift
 
             if (timestamp.HasValue)
             {
-                return ExhaustScanner(Client.scannerOpenTs(tableName, startRow, columnsList, timestamp.Value), numRows);
+                return ExecuteCommand(
+                        () => ExhaustScanner(Client.scannerOpenTs(tableName, startRow, columnsList, timestamp.Value), numRows));
             }
 
-            return ExhaustScanner(Client.scannerOpen(tableName, startRow, columnsList), numRows);
+            return ExecuteCommand(
+                    () => ExhaustScanner(Client.scannerOpen(tableName, startRow, columnsList), numRows));
         }
 
         public IList<IHBaseRowData> ScanWithStop(byte[] tableName, byte[] startRow, byte[] stopRow, IList<byte[]> columns, long? timestamp = null, int? numRows = null)
@@ -138,25 +153,31 @@ namespace HBaseNet.Protocols.Thrift
 
             if (timestamp.HasValue)
             {
-                return ExhaustScanner(Client.scannerOpenWithStopTs(tableName, startRow, stopRow, columnsList, timestamp.Value), numRows);
+                return ExecuteCommand(
+                        () => ExhaustScanner(Client.scannerOpenWithStopTs(tableName, startRow, stopRow, columnsList, timestamp.Value), numRows));
             }
 
-            return ExhaustScanner(Client.scannerOpenWithStop(tableName, startRow, stopRow, columnsList), numRows);
+            return ExecuteCommand(
+                    () => ExhaustScanner(Client.scannerOpenWithStop(tableName, startRow, stopRow, columnsList), numRows));
         }
 
         public IList<IHBaseRowData> ScanWithPrefix(byte[] tableName, byte[] startRowPrefix, IList<byte[]> columns, int? numRows = null)
         {
-            return ExhaustScanner(Client.scannerOpenWithPrefix(tableName, startRowPrefix, columns.ToList()), numRows);
+            return ExecuteCommand(
+                    () => ExhaustScanner(Client.scannerOpenWithPrefix(tableName, startRowPrefix, columns.ToList()), numRows));
         }
 
         private IList<IHBaseRowData> ExhaustScanner(int id, int? numRows = null)
         {
             if (numRows.HasValue)
             {
-                return Client.scannerGetList(id, numRows.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+                return ExecuteCommand(
+                        () => Client.scannerGetList(id, numRows.Value)
+                                .Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList());
             }
 
-            return Client.scannerGet(id).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
+            return ExecuteCommand(
+                    () => Client.scannerGet(id).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList());
         }
 
         #endregion
@@ -165,24 +186,26 @@ namespace HBaseNet.Protocols.Thrift
 
         public void CreateTable(IHBaseTableData tableData)
         {
-            Client.createTable(
-                tableData.Name, 
-                tableData.ColumnFamilies.Select(cf => new HBaseColumnFamilyData(cf.Value).ColumnDescriptor).ToList());
+            ExecuteCommand(
+                () => Client.createTable(
+                            tableData.Name, 
+                            tableData.ColumnFamilies
+                                .Select(cf => new HBaseColumnFamilyData(cf.Value).ColumnDescriptor).ToList()));
         }
 
         public void DeleteTable(byte[] tableName)
         {
-            Client.deleteTable(tableName);
+            ExecuteCommand(() => Client.deleteTable(tableName));
         }
 
         public void EnableTable(byte[] tableName)
         {
-            Client.enableTable(tableName);
+            ExecuteCommand(() => Client.enableTable(tableName));
         }
 
         public void DisableTable(byte[] tableName)
         {
-            Client.disableTable(tableName);
+            ExecuteCommand(() => Client.disableTable(tableName));
         }
 
         #endregion
@@ -193,11 +216,11 @@ namespace HBaseNet.Protocols.Thrift
         {
             if (timestamp.HasValue)
             {
-                Client.mutateRowsTs(tableName, this.ConvertToClientMutation(mutations).ToList(), timestamp.Value);
+                ExecuteCommand(() => Client.mutateRowsTs(tableName, this.ConvertToClientMutation(mutations).ToList(), timestamp.Value));
             }
             else
             {
-                Client.mutateRows(tableName, this.ConvertToClientMutation(mutations).ToList());   
+                ExecuteCommand(() => Client.mutateRows(tableName, this.ConvertToClientMutation(mutations).ToList()));
             }
         }
 
@@ -223,5 +246,42 @@ namespace HBaseNet.Protocols.Thrift
         }
 
         #endregion
+
+        private void ExecuteCommand(Action action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException("action");
+            }
+
+            try
+            {
+                action();   
+            }
+            catch (IllegalArgument ex)
+            {
+                throw new HBaseException(string.Format("HBase reported illegal arguments. Message: {0}", ex.Message), ex);
+            }
+            catch(IOError ex)
+            {
+                throw new HBaseException(string.Format("HBase reported an IO error. Message: {0}", ex.Message), ex);       
+            }
+            catch(Exception ex)
+            {
+                throw new HBaseException("An unknown exception was thrown when communicating with HBase.", ex);
+            }
+        }
+
+        private T ExecuteCommand<T>(Func<T> func)
+        {
+            T result = default(T);
+
+            ExecuteCommand(() =>
+                               {
+                                   result = func();
+                               });
+
+            return result;
+        }
     }
 }
