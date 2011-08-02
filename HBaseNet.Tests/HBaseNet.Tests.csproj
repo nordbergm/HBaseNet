@@ -63,6 +63,7 @@
     <Compile Include="HBaseEntityBaseTests.cs" />
     <Compile Include="HBaseRowTests.cs" />
     <Compile Include="HBaseTableTests.cs" />
+    <Compile Include="MutationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

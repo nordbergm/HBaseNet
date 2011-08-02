@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ByteArrayEqualityComparer.cs" />
     <Compile Include="HBaseCellData.cs" />
     <Compile Include="HBaseColumnFamilyData.cs" />
     <Compile Include="HBaseRowData.cs" />

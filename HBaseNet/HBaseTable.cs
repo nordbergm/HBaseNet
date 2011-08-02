@@ -5,7 +5,7 @@ using HBaseNet.Protocols;
 
 namespace HBaseNet
 {
-    public class HBaseTable : HBaseEntityBase<IHBaseTableData>
+    public class HBaseTable : HBaseEntityBase<IHBaseTableData>, IHBaseTableData
     {
         public HBaseTable(IHBaseTableData tableData, HBaseDatabase database) : base(tableData)
         {
@@ -34,8 +34,8 @@ namespace HBaseNet
             ColumnFamilies = new Dictionary<byte[], HBaseColumnFamily>();
         }
 
-        public HBaseDatabase Database { get; private set; }
         public byte[] Name { get; private set; }
+        public bool IsEnabled { get; private set; }
         public IDictionary<byte[], HBaseColumnFamily> ColumnFamilies { get; private set; }
 
         #region Row Operations
@@ -156,7 +156,22 @@ namespace HBaseNet
         protected override void Load(IHBaseTableData data)
         {
             Name = data.Name;
+            IsEnabled = data.IsEnabled;
             ColumnFamilies = data.ColumnFamilies.ToDictionary(cf => cf.Key, cf => new HBaseColumnFamily(cf.Key, this));
+        }
+
+        #endregion
+
+        #region Explicit Implementation of IHBaseTableData
+
+        byte[] IHBaseTableData.Name
+        {
+            get { return this.Name; }
+        }
+
+        IDictionary<byte[], IHBaseColumnFamilyData> IHBaseTableData.ColumnFamilies
+        {
+            get { return this.ColumnFamilies.ToDictionary(cf => cf.Key, cf => (IHBaseColumnFamilyData)cf.Value); }
         }
 
         #endregion

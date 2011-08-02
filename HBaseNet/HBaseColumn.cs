@@ -19,6 +19,7 @@ namespace HBaseNet
                 throw new ArgumentNullException("row", "A column must belong to a row.");
             }
 
+            Database = row.Database;
             Name = name;
             Row = row;
         }
@@ -32,7 +33,7 @@ namespace HBaseNet
 
         protected override IList<IHBaseCellData> Read()
         {
-            return Row.Table.Database.Connection.GetColumn(Row.Table.Name, Row.Key, Name);
+            return Database.Connection.GetColumn(Row.Table.Name, Row.Key, Name);
         }
 
         protected override void Load(IList<IHBaseCellData> data)

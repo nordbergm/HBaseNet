@@ -12,6 +12,7 @@ namespace HBaseNet
                 throw new ArgumentNullException("column", "A cell must belong to a column.");
             }
 
+            Database = column.Database;
             Column = column;
         }
 

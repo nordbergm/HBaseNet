@@ -18,6 +18,7 @@ namespace HBaseNet
                 throw new ArgumentNullException("table", "A row must belong to a table.");
             }
 
+            Database = table.Database;
             Key = key;
             Table = table;
         }
@@ -40,7 +41,7 @@ namespace HBaseNet
 
         protected override IHBaseRowData Read()
         {
-            return this.Table.Database.Connection.GetRow(this.Table.Name, this.Key);
+            return Database.Connection.GetRow(this.Table.Name, this.Key);
         }
 
         protected override void Load(IHBaseRowData data)

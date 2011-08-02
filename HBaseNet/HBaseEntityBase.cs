@@ -18,6 +18,11 @@ namespace HBaseNet
         {
         }
 
+        public HBaseDatabase Database { get; protected set; }
+
+        protected abstract T Read();
+        protected abstract void Load(T data);
+
         public virtual void Load()
         {
             T data = this.Read();
@@ -29,8 +34,5 @@ namespace HBaseNet
 
             this.Load(data);
         }
-
-        protected abstract T Read();
-        protected abstract void Load(T data);
     }
 }

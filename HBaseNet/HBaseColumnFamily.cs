@@ -3,7 +3,7 @@ using HBaseNet.Protocols;
 
 namespace HBaseNet
 {
-    public class HBaseColumnFamily : HBaseEntityBase<IHBaseColumnFamilyData>
+    public class HBaseColumnFamily : HBaseEntityBase<IHBaseColumnFamilyData>, IHBaseColumnFamilyData
     {
         public HBaseColumnFamily(IHBaseColumnFamilyData cfd, HBaseTable table) : base(cfd)
         {
@@ -27,6 +27,7 @@ namespace HBaseNet
                 throw new ArgumentNullException("table", "A column family must belong to a table.");
             }
 
+            Database = table.Database;
             Name = name;
             Table = table;
             MaxVersions = 3;
@@ -42,7 +43,7 @@ namespace HBaseNet
 
         protected override IHBaseColumnFamilyData Read()
         {
-            var cf = Table.Database.Connection.GetColumnFamilies(Table.Name);
+            var cf = Database.Connection.GetColumnFamilies(Table.Name);
 
             if (cf.ContainsKey(Name))
             {
@@ -57,6 +58,25 @@ namespace HBaseNet
             Name = data.Name;
             MaxVersions = data.MaxVersions;
             BlockCacheEnabled = data.BlockCacheEnabled;
+        }
+
+        #endregion
+
+        #region Explicit Implementation of IHBaseColumnFamilyData
+
+        byte[] IHBaseColumnFamilyData.Name
+        {
+            get { return this.Name; }
+        }
+
+        int IHBaseColumnFamilyData.MaxVersions
+        {
+            get { return this.MaxVersions; }
+        }
+
+        bool IHBaseColumnFamilyData.BlockCacheEnabled
+        {
+            get { return this.BlockCacheEnabled; }
         }
 
         #endregion

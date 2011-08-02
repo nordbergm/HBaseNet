@@ -57,7 +57,9 @@ namespace HBaseNet.Protocols.Thrift
                 throw new InvalidOperationException("Connection must be open to retrieve tables.");
             }
 
-            return Client.getTableNames().Select(t => (IHBaseTableData)new HBaseTableData(t, GetColumnFamilies(t))).ToList();
+            return Client.getTableNames()
+                    .Select(t => (IHBaseTableData)new HBaseTableData(t, Client.isTableEnabled(t), GetColumnFamilies(t)))
+                    .ToList();
         }
 
         public IDictionary<byte[], IHBaseColumnFamilyData> GetColumnFamilies(byte[] tableName)
@@ -147,8 +149,6 @@ namespace HBaseNet.Protocols.Thrift
             return ExhaustScanner(Client.scannerOpenWithPrefix(tableName, startRowPrefix, columns.ToList()), numRows);
         }
 
-        #endregion
-
         private IList<IHBaseRowData> ExhaustScanner(int id, int? numRows = null)
         {
             if (numRows.HasValue)
@@ -156,7 +156,72 @@ namespace HBaseNet.Protocols.Thrift
                 return Client.scannerGetList(id, numRows.Value).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
             }
 
-            return Client.scannerGet(id).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList(); 
+            return Client.scannerGet(id).Select(r => (IHBaseRowData)new HBaseRowData(r)).ToList();
         }
+
+        #endregion
+
+        #region Table Operations
+
+        public void CreateTable(IHBaseTableData tableData)
+        {
+            Client.createTable(
+                tableData.Name, 
+                tableData.ColumnFamilies.Select(cf => new HBaseColumnFamilyData(cf.Value).ColumnDescriptor).ToList());
+        }
+
+        public void DeleteTable(byte[] tableName)
+        {
+            Client.deleteTable(tableName);
+        }
+
+        public void EnableTable(byte[] tableName)
+        {
+            Client.enableTable(tableName);
+        }
+
+        public void DisableTable(byte[] tableName)
+        {
+            Client.disableTable(tableName);
+        }
+
+        #endregion
+
+        #region Mutation Operations
+
+        public void MutateRows(byte[] tableName, IList<IHBaseMutation> mutations, long? timestamp = null)
+        {
+            if (timestamp.HasValue)
+            {
+                Client.mutateRowsTs(tableName, this.ConvertToClientMutation(mutations).ToList(), timestamp.Value);
+            }
+            else
+            {
+                Client.mutateRows(tableName, this.ConvertToClientMutation(mutations).ToList());   
+            }
+        }
+
+        private IEnumerable<BatchMutation> ConvertToClientMutation(IEnumerable<IHBaseMutation> mutations)
+        {
+            var mutationsByRow = mutations.GroupBy(m => m.Row, new ByteArrayEqualityComparer());
+
+            foreach (var mbr in mutationsByRow)
+            {
+                yield return new BatchMutation
+                                {
+                                    Row = mbr.Key,
+                                    Mutations = mbr.Select(m => new Mutation
+                                                                    {
+                                                                        Column = m.Column,
+                                                                        IsDelete = m.IsDelete,
+                                                                        Value = m.Value
+                                                                    })
+                                                    .ToList()
+                                };
+            }
+
+        }
+
+        #endregion
     }
 }
