@@ -12,7 +12,7 @@ namespace HBaseNet.Protocols.Thrift.IntegrationTests
     public class HBaseThriftConnectionTests
     {
         private const string Host = "hbase";
-        private const int Port = 9090;
+        private const int Port = 9091;
 
         private static readonly byte[] TableName = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
         private static readonly byte[] ColFamName = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
