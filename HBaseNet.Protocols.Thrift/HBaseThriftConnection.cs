@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Thrift;
 using Thrift.HBase;
 using Thrift.Protocol;
 using Thrift.Transport;
@@ -135,7 +136,7 @@ namespace HBaseNet.Protocols.Thrift
 
         public IList<IHBaseRowData> Scan(byte[] tableName, byte[] startRow, IList<byte[]> columns, long? timestamp = null, int? numRows = null)
         {
-            List<byte[]> columnsList = columns.ToList();
+            List<byte[]> columnsList = columns != null ? columns.ToList() : null;
 
             if (timestamp.HasValue)
             {
@@ -149,7 +150,7 @@ namespace HBaseNet.Protocols.Thrift
 
         public IList<IHBaseRowData> ScanWithStop(byte[] tableName, byte[] startRow, byte[] stopRow, IList<byte[]> columns, long? timestamp = null, int? numRows = null)
         {
-            List<byte[]> columnsList = columns.ToList();
+            List<byte[]> columnsList = columns != null ? columns.ToList() : null;
 
             if (timestamp.HasValue)
             {
@@ -163,8 +164,10 @@ namespace HBaseNet.Protocols.Thrift
 
         public IList<IHBaseRowData> ScanWithPrefix(byte[] tableName, byte[] startRowPrefix, IList<byte[]> columns, int? numRows = null)
         {
+            List<byte[]> columnsList = columns != null ? columns.ToList() : null;
+
             return ExecuteCommand(
-                    () => ExhaustScanner(Client.scannerOpenWithPrefix(tableName, startRowPrefix, columns.ToList()), numRows));
+                    () => ExhaustScanner(Client.scannerOpenWithPrefix(tableName, startRowPrefix, columnsList), numRows));
         }
 
         private IList<IHBaseRowData> ExhaustScanner(int id, int? numRows = null)
@@ -265,6 +268,10 @@ namespace HBaseNet.Protocols.Thrift
             catch(IOError ex)
             {
                 throw new HBaseException(string.Format("HBase reported an IO error. Message: {0}", ex.Message), ex);       
+            }
+            catch(TApplicationException ex)
+            {
+                throw new HBaseException(string.Format("An internal error occured in HBase. Message: {0}", ex.Message), ex);       
             }
             catch(Exception ex)
             {

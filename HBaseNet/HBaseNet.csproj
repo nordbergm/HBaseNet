@@ -47,6 +47,7 @@
     <Compile Include="HBaseEntityBase.cs" />
     <Compile Include="HBaseException.cs" />
     <Compile Include="HBaseTable.cs" />
+    <Compile Include="Mutations\DeleteColumnValueMutation.cs" />
     <Compile Include="Mutations\UpdateColumnMutation.cs" />
     <Compile Include="Mutations\DeleteColumnMutation.cs" />
     <Compile Include="Mutations\HBaseMutationBase.cs" />

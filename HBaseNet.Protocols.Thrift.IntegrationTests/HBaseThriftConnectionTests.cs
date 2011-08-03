@@ -14,15 +14,15 @@ namespace HBaseNet.Protocols.Thrift.IntegrationTests
         private const string Host = "hbase";
         private const int Port = 9091;
 
-        private static readonly byte[] TableName = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
-        private static readonly byte[] ColFamName = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
-        private static readonly byte[] RowKey1 = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
-        private static readonly byte[] RowKey2 = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
-        private static readonly byte[] ColName = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
-        private static readonly byte[] ColNameToDelete = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] TableName = Encoding.UTF8.GetBytes("t" + Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] ColFamName = Encoding.UTF8.GetBytes("cf" + Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] RowKey1 = Encoding.UTF8.GetBytes("k" + Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] RowKey2 = Encoding.UTF8.GetBytes("k" + Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] ColName = Encoding.UTF8.GetBytes("c" + Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] ColNameToDelete = Encoding.UTF8.GetBytes("c" + Guid.NewGuid().ToString().Normalize());
         private static readonly byte[] FqColName;
         private static readonly byte[] FqColNameToDelete;
-        private static readonly byte[] CellVal = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString().Normalize());
+        private static readonly byte[] CellVal = Encoding.UTF8.GetBytes("v" + Guid.NewGuid().ToString().Normalize());
         private static long deleteTimestamp = 0;
 
         static HBaseThriftConnectionTests()
@@ -206,6 +206,152 @@ namespace HBaseNet.Protocols.Thrift.IntegrationTests
                     Assert.Contains(FqColName, row.Columns.Keys, new ByteArrayEqualityComparer());
                     Assert.Equal(1, row.Columns[columns[0]].Count);
                     Assert.Equal(CellVal, row.Columns[columns[0]][0].Value);
+                }
+            }
+        }
+
+        [Fact]
+        [TestPriority(4)]
+        public void CanOpenScannerWithStartRowAllColumns()
+        {
+            using (HBaseThriftConnection connection = new HBaseThriftConnection(Host, Port))
+            {
+                connection.Open();
+
+                var rows = connection.Scan(TableName, RowKey1, null);
+
+                // Expect one or two rows because RowKey1 and RowKey2 are not intentionally in order.
+                Assert.InRange(rows.Count, 1, 2);
+
+                foreach (var row in rows)
+                {
+                    IList<byte[]> columns = row.Columns.Keys.ToList();
+
+                    Assert.Equal(2, row.Columns.Count);
+                    Assert.Contains(FqColName, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Contains(FqColNameToDelete, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Equal(1, row.Columns[columns[0]].Count);
+                    Assert.Equal(1, row.Columns[columns[1]].Count);
+                    Assert.Equal(CellVal, row.Columns[columns[0]][0].Value);
+                    Assert.Equal(CellVal, row.Columns[columns[1]][0].Value);   
+                }
+            }
+        }
+
+        [Fact]
+        [TestPriority(4)]
+        public void CanOpenScannerWithStartRowAndMaxRowsAllColumns()
+        {
+            using (HBaseThriftConnection connection = new HBaseThriftConnection(Host, Port))
+            {
+                connection.Open();
+
+                var rows = connection.Scan(TableName, RowKey1, null, null, 1);
+
+                Assert.Equal(rows.Count, 1);
+
+                rows = connection.Scan(TableName, RowKey1, null, null, 0);
+
+                Assert.Equal(rows.Count, 0);
+            }
+        }
+
+        [Fact]
+        [TestPriority(4)]
+        public void CanOpenScannerWithStartRowAndSingleColumn()
+        {
+            using (HBaseThriftConnection connection = new HBaseThriftConnection(Host, Port))
+            {
+                connection.Open();
+
+                var rows = connection.Scan(TableName, RowKey1, new List<byte[]> { FqColName }, null, 10);
+
+                // Expect one or two rows because RowKey1 and RowKey2 are not intentionally in order.
+                Assert.InRange(rows.Count, 1, 2);
+
+                foreach (var row in rows)
+                {
+                    IList<byte[]> columns = row.Columns.Keys.ToList();
+
+                    Assert.Equal(1, row.Columns.Count);
+                    Assert.Contains(FqColName, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Equal(1, row.Columns[columns[0]].Count);
+                    Assert.Equal(CellVal, row.Columns[columns[0]][0].Value);
+                }
+            }
+        }
+
+        [Fact]
+        [TestPriority(4)]
+        public void CanOpenScannerWithStartRowAndStopRowAndAllColumns()
+        {
+            using (HBaseThriftConnection connection = new HBaseThriftConnection(Host, Port))
+            {
+                connection.Open();
+
+                string row1 = Encoding.UTF8.GetString(RowKey1);
+                string row2 = Encoding.UTF8.GetString(RowKey2);
+
+                byte[] start;
+                byte[] stop;
+
+                if (row1.CompareTo(row2) > 0)
+                {
+                    start = RowKey2;
+                    stop = RowKey1;
+                }
+                else
+                {
+                    start = RowKey1;
+                    stop = RowKey2;
+                }
+
+                var rows = connection.ScanWithStop(TableName, start, stop, null, null, 10);
+
+                // The stop row is not included in a stop row scan
+                Assert.Equal(1, rows.Count);
+
+                foreach (var row in rows)
+                {
+                    IList<byte[]> columns = row.Columns.Keys.ToList();
+
+                    Assert.Equal(2, row.Columns.Count);
+                    Assert.Contains(FqColName, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Contains(FqColNameToDelete, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Equal(1, row.Columns[columns[0]].Count);
+                    Assert.Equal(1, row.Columns[columns[1]].Count);
+                    Assert.Equal(CellVal, row.Columns[columns[0]][0].Value);
+                    Assert.Equal(CellVal, row.Columns[columns[1]][0].Value);   
+                }
+            }
+        }
+
+        [Fact]
+        [TestPriority(4)]
+        public void CanOpenScannerWithPrefixStartRowAndAllColumns()
+        {
+            using (HBaseThriftConnection connection = new HBaseThriftConnection(Host, Port))
+            {
+                connection.Open();
+
+                // All keys are prefixed with 'k'.
+                byte[] startPrefix = new byte[] {(byte) 'k'};
+
+                var rows = connection.ScanWithPrefix(TableName, startPrefix, null, 10);
+
+                Assert.Equal(2, rows.Count);
+
+                foreach (var row in rows)
+                {
+                    IList<byte[]> columns = row.Columns.Keys.ToList();
+
+                    Assert.Equal(2, row.Columns.Count);
+                    Assert.Contains(FqColName, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Contains(FqColNameToDelete, row.Columns.Keys, new ByteArrayEqualityComparer());
+                    Assert.Equal(1, row.Columns[columns[0]].Count);
+                    Assert.Equal(1, row.Columns[columns[1]].Count);
+                    Assert.Equal(CellVal, row.Columns[columns[0]][0].Value);
+                    Assert.Equal(CellVal, row.Columns[columns[1]][0].Value);
                 }
             }
         }
