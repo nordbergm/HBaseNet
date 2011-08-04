@@ -2,13 +2,24 @@
   <PropertyGroup>
     <Configuration Condition="">Debug</Configuration>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <DestFolder>Deploy\</DestFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <ReferencedAssemblies Include="Dependencies\**\*.dll" />
+  </ItemGroup>
+  
 	<UsingTask
     AssemblyFile="$(MSBuildProjectDirectory)\Dependencies\xunit.runner.msbuild.dll"
     TaskName="Xunit.Runner.MSBuild.xunit"/>
 
   <Target Name="Build">
-    <MSBuild Projects="$(MSBuildProjectDirectory)\HBaseNet.sln" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\HBaseNet.sln">
+      <Output ItemName="OutputFiles" TaskParameter="TargetOutputs"/>
+    </MSBuild>
+    <Copy SourceFiles="@(OutputFiles)"
+       DestinationFiles="@(OutputFiles->'$(DestFolder)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ReferencedAssemblies)" DestinationFolder="$(DestFolder)" />
   </Target>
   <Target Name="Test" DependsOnTargets="Build">
     <xunit Assembly="HBaseNet.Tests\bin\$(Configuration)\HBaseNet.Tests.dll" />
