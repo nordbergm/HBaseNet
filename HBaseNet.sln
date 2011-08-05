@@ -1,28 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet", "HBaseNet\HBaseNet.csproj", "{89E96660-7B49-4763-94AA-7D2F3C4394FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet", "src\HBaseNet\HBaseNet.csproj", "{89E96660-7B49-4763-94AA-7D2F3C4394FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrift.HBase", "Thrift.HBase\Thrift.HBase.csproj", "{7F7E4FAD-84D3-4338-8B5F-F5B48936C466}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrift.HBase", "src\Thrift.HBase\Thrift.HBase.csproj", "{7F7E4FAD-84D3-4338-8B5F-F5B48936C466}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6D2281C1-3265-4909-8A8E-C6AD09BE716A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Protocols", "Protocols", "{8675DA0A-F193-4425-B10A-9A4D58DDE3EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Tests", "HBaseNet.Tests\HBaseNet.Tests.csproj", "{25850B64-4B96-4485-8D2D-0D28A5DB87C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Tests", "src\HBaseNet.Tests\HBaseNet.Tests.csproj", "{25850B64-4B96-4485-8D2D-0D28A5DB87C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift", "HBaseNet.Protocols.Thrift\HBaseNet.Protocols.Thrift.csproj", "{CB5B2B54-A2B8-496E-AC3D-177A892861C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift", "src\HBaseNet.Protocols.Thrift\HBaseNet.Protocols.Thrift.csproj", "{CB5B2B54-A2B8-496E-AC3D-177A892861C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Autofac", "HBaseNet.Autofac\HBaseNet.Autofac.csproj", "{8E1E2AE4-39D0-486D-9AE1-956B97BB5F73}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Autofac", "src\HBaseNet.Autofac\HBaseNet.Autofac.csproj", "{8E1E2AE4-39D0-486D-9AE1-956B97BB5F73}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{4D2064F9-D016-4E26-8ED6-A12AD7230D65}"
 	ProjectSection(SolutionItems) = preProject
 		HBaseNetBuild.proj = HBaseNetBuild.proj
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift.Tests", "HBaseNet.Protocols.Thrift.Tests\HBaseNet.Protocols.Thrift.Tests.csproj", "{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift.Tests", "src\HBaseNet.Protocols.Thrift.Tests\HBaseNet.Protocols.Thrift.Tests.csproj", "{B1FD3CB8-105F-444C-BAFB-D64F2C29D8DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift.IntegrationTests", "HBaseNet.Protocols.Thrift.IntegrationTests\HBaseNet.Protocols.Thrift.IntegrationTests.csproj", "{9D8B82A6-D9B6-4F8C-9366-8D250A053429}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBaseNet.Protocols.Thrift.IntegrationTests", "src\HBaseNet.Protocols.Thrift.IntegrationTests\HBaseNet.Protocols.Thrift.IntegrationTests.csproj", "{9D8B82A6-D9B6-4F8C-9366-8D250A053429}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

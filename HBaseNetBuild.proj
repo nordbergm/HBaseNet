@@ -4,13 +4,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <DestFolder>Deploy\</DestFolder>
+    <Src>$(MSBuildProjectDirectory)\src\</Src>
   </PropertyGroup>
   <ItemGroup>
-    <ReferencedAssemblies Include="Dependencies\**\*.dll" />
+    <ReferencedAssemblies Include="$(Src)\Dependencies\**\*.dll" />
   </ItemGroup>
   
 	<UsingTask
-    AssemblyFile="$(MSBuildProjectDirectory)\Dependencies\xunit.runner.msbuild.dll"
+    AssemblyFile="$(Src)\Dependencies\xunit.runner.msbuild.dll"
     TaskName="Xunit.Runner.MSBuild.xunit"/>
 
   <Target Name="Build">
@@ -22,10 +23,10 @@
     <Copy SourceFiles="@(ReferencedAssemblies)" DestinationFolder="$(DestFolder)" />
   </Target>
   <Target Name="Test" DependsOnTargets="Build">
-    <xunit Assembly="HBaseNet.Tests\bin\$(Configuration)\HBaseNet.Tests.dll" />
-    <xunit Assembly="HBaseNet.Protocols.Thrift.Tests\bin\$(Configuration)\HBaseNet.Protocols.Thrift.Tests.dll" />
+    <xunit Assembly="$(Src)\HBaseNet.Tests\bin\$(Configuration)\HBaseNet.Tests.dll" />
+    <xunit Assembly="$(Src)\HBaseNet.Protocols.Thrift.Tests\bin\$(Configuration)\HBaseNet.Protocols.Thrift.Tests.dll" />
   </Target>
   <Target Name="IntegrationTest" DependsOnTargets="Build">
-    <xunit Assembly="HBaseNet.Protocols.Thrift.IntegrationTests\bin\$(Configuration)\HBaseNet.Protocols.Thrift.IntegrationTests.dll" />
+    <xunit Assembly="$(Src)\HBaseNet.Protocols.Thrift.IntegrationTests\bin\$(Configuration)\HBaseNet.Protocols.Thrift.IntegrationTests.dll" />
   </Target>
 </Project>
