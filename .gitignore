@@ -27,4 +27,7 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-Deploy/*
+build/tmp/*
+packages/*
+!packages/repositories.config
+!nuget/*

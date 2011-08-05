@@ -1,0 +1,102 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask AssemblyFile="$(MSBuildExtensionsPath)\AssemblyInfoTask\AssemblyInfoTask.dll" TaskName="AssemblyInfo"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionsPath)\Xunit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+  
+  <PropertyGroup>
+    <Configuration Condition="">Debug</Configuration>
+    <BuildDir>$(MSBuildProjectDirectory)\tmp</BuildDir>
+    <BuildDirSrc>$(MSBuildProjectDirectory)\tmp\src</BuildDirSrc>
+    <BuildDirNuget>$(BuildDir)\nuget</BuildDirNuget>
+    <DestFolder>$(BuildDir)\deploy</DestFolder>
+    <TestDestFolder>$(BuildDir)\tests</TestDestFolder>
+    <SrcDir>$(MSBuildProjectDirectory)\..\src</SrcDir>
+    <NugetDir>$(MSBuildProjectDirectory)\..\nuget</NugetDir>
+    <NuspecFileName>HBaseNet.nuspec</NuspecFileName>
+    <PackagesDir>$(BuildDir)\packages</PackagesDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SrcFiles Include="$(SrcDir)\\**\*.*" />
+    <NugetFiles Include="$(NugetDir)\\**\*.*" />
+    <ProjectFiles Include="$(SrcDir)\\**\*.csproj" Exclude="$(SrcDir)\\**\*Tests.csproj" />
+    <TestProjectFiles Include="$(SrcDir)\\**\*Tests.csproj" Exclude="$(SrcDir)\\**\*IntegrationTests.csproj" />
+    <IntegrationTestProjectFiles Include="$(SrcDir)\\**\*IntegrationTests.csproj" />
+    <PackageFiles Include="$(PackagesDir)\\**\*.dll" /> 
+  </ItemGroup>
+
+  <PropertyGroup>
+    <BUILD_NUMBER Condition="">0</BUILD_NUMBER>
+    <VersionMajor>0</VersionMajor>
+    <VersionMinor>1</VersionMinor>
+    <Version>$(VersionMajor).$(VersionMinor).$(BUILD_NUMBER).0</Version>
+  </PropertyGroup>
+
+  <Target Name="CopyToBuild">
+    <Copy SourceFiles="@(SrcFiles)"
+          DestinationFiles="@(SrcFiles->'$(BuildDirSrc)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(NugetFiles)"
+          DestinationFiles="@(NugetFiles->'$(BuildDirNuget)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="Version" DependsOnTargets="CopyToBuild">
+    <AssemblyInfo AssemblyInfoFiles="$(BuildDirSrc)\AssemblyInfo.cs"
+                      AssemblyMajorVersion="$(VersionMajor)"
+                      AssemblyMinorVersion="$(VersionMinor)"
+                      AssemblyBuildNumber="$(BUILD_NUMBER)"
+                      AssemblyRevision="0"
+                      AssemblyFileMajorVersion="$(VersionMajor)"
+                      AssemblyFileMinorVersion="$(VersionMinor)"
+                      AssemblyFileBuildNumber="$(BUILD_NUMBER)"
+                      AssemblyFileRevision="0"
+                      ComVisible="false"
+                      AssemblyCompany=""
+                      AssemblyConfiguration=""
+                      AssemblyCopyright=""
+                      AssemblyCulture=""
+                      AssemblyDescription="A .NET library for interacting with Apache HBase."
+                      AssemblyProduct="HBaseNet"
+                      AssemblyTitle="HBaseNet">
+      <Output TaskParameter="MaxAssemblyVersion" PropertyName="MaxAssemblyVersion"/>
+      <Output TaskParameter="MaxAssemblyFileVersion" PropertyName="MaxAssemblyFileVersion"/>
+    </AssemblyInfo>
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="Version">
+    <MSBuild Projects="@(ProjectFiles)" Properties="SolutionDir=$(BuildDir)\" >
+      <Output ItemName="OutputFiles" TaskParameter="TargetOutputs" />
+    </MSBuild>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFiles="@(OutputFiles->'$(DestFolder)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="SetupTest" DependsOnTargets="Build">
+    <Copy SourceFiles="@(OutputFiles)" DestinationFiles="@(OutputFiles->'$(TestDestFolder)\%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(PackageFiles)" DestinationFiles="@(PackageFiles->'$(TestDestFolder)\%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="UnitTest" DependsOnTargets="SetupTest">     
+    <MSBuild Projects="@(TestProjectFiles)" Properties="SolutionDir=$(BuildDir)\">
+      <Output ItemName="OutputFiles" TaskParameter="TargetOutputs" />
+    </MSBuild>
+    <Copy SourceFiles="@(OutputFiles)"
+       DestinationFiles="@(OutputFiles->'$(TestDestFolder)\%(RecursiveDir)%(Filename)%(Extension)')" />
+   
+    <xunit Assembly="$(TestDestFolder)\HBaseNet.Tests.dll" />
+    <xunit Assembly="$(TestDestFolder)\HBaseNet.Protocols.Thrift.Tests.dll" />
+  </Target>
+  
+  <Target Name="IntegrationTest" DependsOnTargets="SetupTest">
+    <MSBuild Projects="@(IntegrationTestProjectFiles)" Properties="SolutionDir=$(BuildDir)\">
+      <Output ItemName="OutputFiles" TaskParameter="TargetOutputs" />
+    </MSBuild>
+    <Copy SourceFiles="@(OutputFiles)"
+       DestinationFiles="@(OutputFiles->'$(TestDestFolder)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+    <xunit Assembly="$(TestDestFolder)\HBaseNet.Protocols.Thrift.IntegrationTests.dll" />
+  </Target>
+
+  <Target Name="Package" DependsOnTargets="Build">
+    <Copy SourceFiles="$(BuildDirNuget)\$(NuspecFileName)" DestinationFiles="$(DestFolder)\$(NuspecFileName)" />
+    <Exec Command="$(Mono) $(BuildDirNuget)\NuGet.exe pack $(DestFolder)\$(NuspecFileName) -Version $(Version) -OutputDirectory $(DestFolder)" />
+    <Delete Files="$(DestFolder)\$(NuspecFileName)" />
+  </Target>
+</Project>
