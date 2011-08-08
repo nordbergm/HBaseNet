@@ -28,6 +28,5 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 build/tmp/*
-packages/*
-!packages/repositories.config
-!nuget/*
+wraps/_cache/*
+/*.wrap
